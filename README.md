@@ -33,6 +33,7 @@ All workout data is stored in an **in-memory Python list**, which makes the appl
 ---
 
 # Project Structure
+```
 fitlog-fastapi/
 │
 ├── main.py
@@ -51,6 +52,7 @@ fitlog-fastapi/
 ├── add-workout.png
 ├── workout-list.png
 └── edit-workout.png
+```
 
 ---
 
