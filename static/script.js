@@ -1,17 +1,26 @@
+// Get references to the workout form and the table body where workouts will be displayed
 const form = document.getElementById("workout-form");
 const tableBody = document.getElementById("workout-table-body");
 
+// Log a message to confirm that the JavaScript file has loaded successfully
 console.log("script loaded");
 
+// Function to retrieve all workouts from the FastAPI backend and display them in the table
 async function fetchWorkouts() {
     try {
+        // Send a GET request to the backend API to retrieve the list of workouts
         const response = await fetch("/workouts");
+        // Convert the response data into JSON format
         const workouts = await response.json();
 
+        // Clear the existing table rows before adding updated data
         tableBody.innerHTML = "";
 
+        // Loop through each workout and create a new table row for it
         workouts.forEach(workout => {
+            // Create a new table row element
             const row = document.createElement("tr");
+            // Insert workout data into the table row using template literals
             row.innerHTML = `
                 <td>${workout.exercise}</td>
                 <td>${workout.sets}</td>
@@ -23,19 +32,23 @@ async function fetchWorkouts() {
                     <button type="button" onclick="deleteWorkout(${workout.id})">Delete</button>
                 </td>
             `;
+            // Add the new row to the workout table body
             tableBody.appendChild(row);
         });
     } catch (error) {
         console.error("Error fetching workouts:", error);
     }
 }
-
+// Event listener for submitting the workout form
 form.addEventListener("submit", async function (e) {
+    // Prevent the page from reloading when the form is submitted
     e.preventDefault();
     console.log("form submitted");
 
+    // Check if a workout ID exists (this determines whether we are editing or creating)
     const id = document.getElementById("workout-id").value;
 
+    // Collect the form input values and create a workout object
     const workout = {
         exercise: document.getElementById("exercise").value,
         sets: parseInt(document.getElementById("sets").value),
