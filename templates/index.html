@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitLog</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+    <div class="container">
+        <h1>FitLog</h1>
+        <p>Track your workouts with FastAPI</p>
+
+        <form id="workout-form">
+            <input type="hidden" id="workout-id" />
+            <input type="text" id="exercise" placeholder="Exercise" required />
+            <input type="number" id="sets" placeholder="Sets" required />
+            <input type="number" id="reps" placeholder="Reps" required />
+            <input type="number" id="weight" placeholder="Weight (lbs)" step="0.1" required />
+            <input type="date" id="date" required />
+            <button type="submit">Save Workout</button>
+        </form>
+
+        <h2>Workout List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Exercise</th>
+                    <th>Sets</th>
+                    <th>Reps</th>
+                    <th>Weight</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="workout-table-body"></tbody>
+        </table>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
