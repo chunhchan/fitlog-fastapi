@@ -11,32 +11,62 @@
 <body>
     <div class="container">
         <h1>FitLog</h1>
-        <p>Track your workouts with FastAPI</p>
+        <p>Track your workouts with FastAPI and MongoDB</p>
 
-        <form id="workout-form">
-            <input type="hidden" id="workout-id" />
-            <input type="text" id="exercise" placeholder="Exercise" required />
-            <input type="number" id="sets" placeholder="Sets" required />
-            <input type="number" id="reps" placeholder="Reps" required />
-            <input type="number" id="weight" placeholder="Weight (lbs)" step="0.1" required />
-            <input type="date" id="date" required />
-            <button type="submit">Save Workout</button>
-        </form>
+        <div id="auth-section">
+            <div class="auth-box">
+                <h2>Register</h2>
+                <form id="register-form">
+                    <input type="text" id="register-name" placeholder="Name" required />
+                    <input type="email" id="register-email" placeholder="Email" required />
+                    <input type="password" id="register-password" placeholder="Password" required />
+                    <button type="submit">Register</button>
+                </form>
+            </div>
 
-        <h2>Workout List</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Exercise</th>
-                    <th>Sets</th>
-                    <th>Reps</th>
-                    <th>Weight</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="workout-table-body"></tbody>
-        </table>
+            <div class="auth-box">
+                <h2>Login</h2>
+                <form id="login-form">
+                    <input type="email" id="login-email" placeholder="Email" required />
+                    <input type="password" id="login-password" placeholder="Password" required />
+                    <button type="submit">Login</button>
+                </form>
+            </div>
+        </div>
+
+        <p id="message"></p>
+
+        <div id="app-section" style="display: none;">
+            <div class="user-bar">
+                <p id="user-info"></p>
+                <button type="button" onclick="logout()">Logout</button>
+            </div>
+
+            <form id="workout-form">
+                <input type="hidden" id="workout-id" />
+                <input type="text" id="exercise" placeholder="Exercise" required />
+                <input type="number" id="sets" placeholder="Sets" required />
+                <input type="number" id="reps" placeholder="Reps" required />
+                <input type="number" id="weight" placeholder="Weight (lbs)" step="0.1" required />
+                <input type="date" id="date" required />
+                <button type="submit">Save Workout</button>
+            </form>
+
+            <h2>Workout List</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Exercise</th>
+                        <th>Sets</th>
+                        <th>Reps</th>
+                        <th>Weight</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="workout-table-body"></tbody>
+            </table>
+        </div>
     </div>
 
     <script src="/static/script.js"></script>

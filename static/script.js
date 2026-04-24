@@ -1,19 +1,129 @@
-// Get the form and workout table
-const form = document.getElementById("workout-form");
+const registerForm = document.getElementById("register-form");
+const loginForm = document.getElementById("login-form");
+const workoutForm = document.getElementById("workout-form");
 const tableBody = document.getElementById("workout-table-body");
+const message = document.getElementById("message");
+const authSection = document.getElementById("auth-section");
+const appSection = document.getElementById("app-section");
+const userInfo = document.getElementById("user-info");
 
-// Load all workouts from the backend
+let token = localStorage.getItem("token");
+let userEmail = localStorage.getItem("userEmail");
+let userName = localStorage.getItem("userName");
+
+
+function showMessage(text) {
+    message.textContent = text;
+}
+
+
+function updateView() {
+    if (token) {
+        authSection.style.display = "none";
+        appSection.style.display = "block";
+        userInfo.textContent = `Logged in as ${userName} (${userEmail})`;
+        fetchWorkouts();
+    } else {
+        authSection.style.display = "grid";
+        appSection.style.display = "none";
+        tableBody.innerHTML = "";
+    }
+}
+
+
+registerForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const user = {
+        name: document.getElementById("register-name").value,
+        email: document.getElementById("register-email").value,
+        password: document.getElementById("register-password").value
+    };
+
+    try {
+        const response = await fetch("/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(user)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            showMessage(data.detail || "Registration failed");
+            return;
+        }
+
+        showMessage("Registration successful. You can now log in.");
+        registerForm.reset();
+
+    } catch (error) {
+        showMessage("Error registering user.");
+        console.error(error);
+    }
+});
+
+
+loginForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const user = {
+        email: document.getElementById("login-email").value,
+        password: document.getElementById("login-password").value
+    };
+
+    try {
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(user)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            showMessage(data.detail || "Login failed");
+            return;
+        }
+
+        token = data.access_token;
+        userName = data.name;
+        userEmail = data.email;
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("userName", userName);
+        localStorage.setItem("userEmail", userEmail);
+
+        showMessage("Login successful.");
+        loginForm.reset();
+        updateView();
+
+    } catch (error) {
+        showMessage("Error logging in.");
+        console.error(error);
+    }
+});
+
+
 async function fetchWorkouts() {
     try {
-        const response = await fetch("/workouts");
+        const response = await fetch("/workouts", {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
         const workouts = await response.json();
 
-        // Clear old rows
         tableBody.innerHTML = "";
 
-        // Add each workout to the table
         workouts.forEach(workout => {
             const row = document.createElement("tr");
+
             row.innerHTML = `
                 <td>${workout.exercise}</td>
                 <td>${workout.sets}</td>
@@ -21,19 +131,22 @@ async function fetchWorkouts() {
                 <td>${workout.weight}</td>
                 <td>${workout.date}</td>
                 <td>
-                    <button type="button" onclick="editWorkout(${workout.id}, '${workout.exercise}', ${workout.sets}, ${workout.reps}, ${workout.weight}, '${workout.date}')">Edit</button>
-                    <button type="button" onclick="deleteWorkout(${workout.id})">Delete</button>
+                    <button type="button" onclick="editWorkout('${workout.id}', '${workout.exercise}', ${workout.sets}, ${workout.reps}, ${workout.weight}, '${workout.date}')">Edit</button>
+                    <button type="button" onclick="deleteWorkout('${workout.id}')">Delete</button>
                 </td>
             `;
+
             tableBody.appendChild(row);
         });
+
     } catch (error) {
-        console.error("Error fetching workouts:", error);
+        showMessage("Error loading workouts.");
+        console.error(error);
     }
 }
 
-// Handle form submit for adding or updating a workout
-form.addEventListener("submit", async function (e) {
+
+workoutForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const id = document.getElementById("workout-id").value;
@@ -47,37 +160,37 @@ form.addEventListener("submit", async function (e) {
     };
 
     try {
-        // Update workout if ID exists
         if (id) {
             await fetch(`/workouts/${id}`, {
                 method: "PUT",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify(workout)
             });
-        }
-        // Otherwise create a new workout
-        else {
+        } else {
             await fetch("/workouts", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify(workout)
             });
         }
 
-        // Reset form and reload table
-        form.reset();
+        workoutForm.reset();
         document.getElementById("workout-id").value = "";
         fetchWorkouts();
+
     } catch (error) {
-        console.error("Error saving workout:", error);
+        showMessage("Error saving workout.");
+        console.error(error);
     }
 });
 
-// Fill form with workout data when Edit is clicked
+
 function editWorkout(id, exercise, sets, reps, weight, date) {
     document.getElementById("workout-id").value = id;
     document.getElementById("exercise").value = exercise;
@@ -87,17 +200,40 @@ function editWorkout(id, exercise, sets, reps, weight, date) {
     document.getElementById("date").value = date;
 }
 
-// Delete a workout and refresh the table
+
 async function deleteWorkout(id) {
     try {
         await fetch(`/workouts/${id}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
         });
+
         fetchWorkouts();
+
     } catch (error) {
-        console.error("Error deleting workout:", error);
+        showMessage("Error deleting workout.");
+        console.error(error);
     }
 }
 
-// Load workouts when the page opens
-fetchWorkouts();
+
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userEmail");
+
+    token = null;
+    userName = null;
+    userEmail = null;
+
+    workoutForm.reset();
+    tableBody.innerHTML = "";
+    showMessage("Logged out.");
+    updateView();
+}
+
+
+
+updateView();
